@@ -31,4 +31,7 @@ const schemeSchema = new mongoose.Schema({
   active: { type: Boolean, default: true, index: true }
 }, { timestamps: true });
 
+schemeSchema.index({ title: "text", description: "text", tags: "text" });
+schemeSchema.index({ domain: 1, "eligibility.districts": 1, active: 1 });
+
 export default mongoose.model("Scheme", schemeSchema);
