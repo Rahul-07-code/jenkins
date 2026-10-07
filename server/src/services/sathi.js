@@ -2,6 +2,8 @@ import Scheme from "../models/Scheme.js";
 import Service from "../models/Service.js";
 import Event from "../models/Event.js";
 import KnowledgeDocument from "../models/KnowledgeDocument.js";
+import { getMemory, remember, providerName as memoryProvider } from "./memory.js";
+import { retrieve as vectorRetrieve } from "./vector.js";
 
 function compact(items) {
   return items.map((item) => ({
@@ -19,7 +21,7 @@ async function retrieveContext(profile = {}, question = "") {
   const text = terms.join(" ");
   const textFilter = text ? { $text: { $search: text } } : {};
 
-  const [schemes, services, events, documents] = await Promise.all([
+  const [schemes, services, events, vectorContext] = await Promise.all([
     Scheme.find({
       active: true,
       $or: [{ domain }, { domain: "other" }],
@@ -31,13 +33,16 @@ async function retrieveContext(profile = {}, question = "") {
       ...(text ? textFilter : {})
     }).limit(5).lean(),
     Event.find({ active: true, ...(text ? textFilter : {}) }).sort({ startAt: 1 }).limit(5).lean(),
-    KnowledgeDocument.find({ status: "ready", ...(text ? textFilter : {}) })
-      .select("title sourceName sourceUrl content")
-      .limit(5)
-      .lean()
+    vectorRetrieve(question, 6)
   ]);
 
-  return { schemes: compact(schemes), services: compact(services), events: compact(events), documents };
+  return {
+    schemes: compact(schemes),
+    services: compact(services),
+    events: compact(events),
+    documents: vectorContext.documents,
+    vectorProvider: vectorContext.provider
+  };
 }
 
 async function askGroq(question, profile, context, history = []) {
@@ -80,13 +85,18 @@ async function askGroq(question, profile, context, history = []) {
   return payload.choices?.[0]?.message?.content?.trim() || null;
 }
 
-export async function answerQuestion({ question, profile, history }) {
+export async function answerQuestion({ question, profile, history, userId }) {
+  const storedMemory = await getMemory(userId, 8);
+  const mergedHistory = [
+    ...storedMemory.map((item) => ({ role: item.role, content: item.content })),
+    ...(history || [])
+  ].slice(-8);
   const context = await retrieveContext(profile, question);
   let answer = null;
 
   if (process.env.GROQ_API_KEY) {
     try {
-      answer = await askGroq(question, profile, context, history);
+      answer = await askGroq(question, profile, context, mergedHistory);
     } catch (error) {
       console.warn("Groq unavailable; using grounded mock response:", error.message);
     }
@@ -106,5 +116,10 @@ export async function answerQuestion({ question, profile, history }) {
     ...context.documents.map((item) => ({ title: item.title, officialUrl: item.sourceUrl }))
   ].filter((item) => item.officialUrl);
 
-  return { answer, sources, context };
+  await remember(userId, [
+    { role: "user", content: question },
+    { role: "assistant", content: answer }
+  ]);
+
+  return { answer, sources, context, memoryProvider: memoryProvider(), vectorProvider: context.vectorProvider };
 }

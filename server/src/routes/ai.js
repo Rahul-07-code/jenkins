@@ -16,7 +16,8 @@ router.post("/chat", requireAuth, async (req, res, next) => {
     const result = await answerQuestion({
       question: question.trim(),
       profile: user.profile || {},
-      history: Array.isArray(history) ? history : []
+      history: Array.isArray(history) ? history : [],
+      userId: req.user.sub
     });
 
     res.json(result);
