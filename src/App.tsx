@@ -11,6 +11,7 @@ import AdminDashboard from "./components/AdminDashboard";
 import SavedPage from "./components/SavedPage";
 import { useLanguage } from "./lib/i18n";
 import ServicesPage from "./components/ServicesPage";
+import EventsPage from "./components/EventsPage";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -98,8 +99,8 @@ function App(){
         <div className="breadcrumb"><span>Praja Sathi</span><ChevronRight size={14}/><b>{titleMap[page]}</b></div>
         {page==="student"&&<StudentDashboard go={go}/>}
         {page==="schemes"&&<Schemes/>}
-        {page==="exams"&&<Exams/>}
-        {page==="competitions"&&<Competitions/>}
+        {page==="exams"&&<EventsPage kind="exams"/>}
+        {page==="competitions"&&<EventsPage kind="competitions"/>}
         {page==="digilocker"&&<DigiLocker/>}
         {page==="farmer"&&<FarmerDashboard go={go}/>}
         {page==="msp"&&<MSP/>}
