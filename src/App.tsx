@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { apiFetch, getStoredUser, saveSession } from "./lib/api";
 import SchemesData from "./components/Schemes";
+import AdminDashboard from "./components/AdminDashboard";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -15,7 +16,7 @@ type Page =
   | "home" | "login" | "register" | "occupation" | "student-details"
   | "student" | "schemes" | "exams" | "competitions" | "digilocker"
   | "farmer" | "msp" | "shops" | "ai" | "government" | "private"
-  | "business" | "senior" | "other" | "settings";
+  | "business" | "senior" | "other" | "settings" | "admin";
 
 const navItems = [
   ["student","Dashboard",Home],["schemes","Schemes",GraduationCap],
@@ -63,7 +64,7 @@ function App(){
   if(["home","login","register","occupation","student-details"].includes(page))
     return <PublicLayout page={page} go={go}/>;
 
-  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings"};
+  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings",admin:"Admin Console"};
   const isFarmer=["farmer","msp","shops"].includes(page);
   const isOther=["government","private","business","senior","other"].includes(page);
 
@@ -86,6 +87,7 @@ function App(){
         <button className="side-link" onClick={()=>go("business")}><BriefcaseBusiness size={18}/><span>Business Owner</span></button>
         <button className="side-link" onClick={()=>go("senior")}><Users size={18}/><span>Senior Citizen</span></button>
         <button className="side-link" onClick={()=>go("other")}><UserRound size={18}/><span>Other Citizen</span></button>
+        {currentUser?.role==="admin"&&<button className="side-link" onClick={()=>go("admin")}><ShieldCheck size={18}/><span>Admin Console</span></button>}
       </aside>
       <main className="main">
         <div className="breadcrumb"><span>Praja Sathi</span><ChevronRight size={14}/><b>{titleMap[page]}</b></div>
@@ -100,6 +102,7 @@ function App(){
         {page==="ai"&&<AI chat={chat} setChat={setChat} message={message} setMessage={setMessage}/>}
         {isOther&&<OtherDashboard kind={page} go={go}/>}
         {page==="settings"&&<SettingsPage/>}
+        {page==="admin"&&currentUser?.role==="admin"&&<AdminDashboard/>}
       </main>
     </div>
     <MobileBottomNav page={page} go={go}/>
