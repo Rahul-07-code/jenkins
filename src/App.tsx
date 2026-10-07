@@ -121,8 +121,9 @@ function MobileBottomNav({page,go}:{page:Page;go:(p:Page)=>void}){
 function LanguageSelect({language,setLanguage}:{language:"en"|"te"|"hi";setLanguage:(language:"en"|"te"|"hi")=>void}){return <select className="language-select" value={language} onChange={e=>setLanguage(e.target.value as "en"|"te"|"hi")} aria-label="Language"><option value="en">EN</option><option value="te">తెలుగు</option><option value="hi">हिन्दी</option></select>}
 
 function PublicLayout({page,go}:{page:Page;go:(p:Page)=>void}){
+  const { language, setLanguage, t } = useLanguage();
   return <div className="public">
-    <header className="public-nav"><button className="brand" onClick={()=>go("home")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button><nav><button onClick={()=>go("home")}>Home</button><button>About</button><button>Features</button><button>Contact</button></nav><div><LanguageSelect language={useLanguage().language} setLanguage={useLanguage().setLanguage}/><button className="outline-btn" onClick={()=>go("login")}>{useLanguage().t("login")}</button><button className="primary-btn compact" onClick={()=>go("register")}>{useLanguage().t("register")}</button></div></header>
+    <header className="public-nav"><button className="brand" onClick={()=>go("home")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button><nav><button onClick={()=>go("home")}>{t("home")}</button><button>About</button><button>Features</button><button>Contact</button></nav><div><LanguageSelect language={language} setLanguage={setLanguage}/><button className="outline-btn" onClick={()=>go("login")}>{t("login")}</button><button className="primary-btn compact" onClick={()=>go("register")}>{t("register")}</button></div></header>
     {page==="home"&&<Landing go={go}/>}
     {page==="login"&&<Login go={go}/>}
     {page==="register"&&<Register go={go}/>}
