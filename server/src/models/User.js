@@ -14,7 +14,10 @@ const profileSchema = new mongoose.Schema({
   education: String,
   income: Number,
   disability: { type: Boolean, default: false },
-  interests: [String]
+  interests: [String],
+  crops: [String],
+  landSize: Number,
+  businessType: String
 }, { _id: false });
 
 const userSchema = new mongoose.Schema({
