@@ -9,6 +9,7 @@ import { apiFetch, getStoredUser, saveSession } from "./lib/api";
 import SchemesData from "./components/Schemes";
 import AdminDashboard from "./components/AdminDashboard";
 import SavedPage from "./components/SavedPage";
+import { useLanguage } from "./lib/i18n";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -47,6 +48,7 @@ function initials(name:string = "Citizen"){
 }
 
 function App(){
+  const { language, setLanguage, t } = useLanguage();
   const [page,setPage]=useState<Page>("home");
   const [currentUser,setCurrentUser]=useState<any>(()=>getStoredUser());
   const [mobileOpen,setMobileOpen]=useState(false);
@@ -72,7 +74,7 @@ function App(){
   return <div className="app-shell">
     <header className="topbar">
       <button className="brand" onClick={()=>go("student")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button>
-      <div className="top-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search schemes, exams, services..."/></div>
+      <div className="top-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={t("search")}/></div><LanguageSelect language={language} setLanguage={setLanguage}/>
       <div className="top-actions"><button aria-label="help"><CircleHelp size={19}/></button><button aria-label="notifications" onClick={()=>go("saved")}><Bell size={19}/></button><button className="avatar" onClick={()=>go("settings")}>{initials(currentUser?.name)}</button></div>
       <button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X/>:<Menu/>}</button>
     </header>
@@ -80,7 +82,7 @@ function App(){
       <aside className={mobileOpen?"sidebar open":"sidebar"}>
         <div className="profile-mini"><div className="avatar large">{initials(currentUser?.name)}</div><div><strong>{currentUser?.name || "Citizen"}</strong><span>{currentUser?.profile?.occupation ? currentUser.profile.occupation.replace("_"," ") : "Citizen"} · {currentUser?.profile?.district || "Telangana"}</span></div></div>
         <div className="side-label">PERSONALIZED</div>
-        {navItems.map(([id,label,Icon])=><button key={id} className={page===id?"side-link active":"side-link"} onClick={()=>go(id as Page)}><Icon size={18}/><span>{label}</span>{id==="schemes"&&<em>8</em>}</button>)}<button className={page==="saved"?"side-link active":"side-link"} onClick={()=>go("saved")}><CalendarClock size={18}/><span>Saved & Activity</span></button>
+        {navItems.map(([id,label,Icon])=><button key={id} className={page===id?"side-link active":"side-link"} onClick={()=>go(id as Page)}><Icon size={18}/><span>{label}</span>{id==="schemes"&&<em>8</em>}</button>)}<button className={page==="saved"?"side-link active":"side-link"} onClick={()=>go("saved")}><CalendarClock size={18}/><span>{t("saved")}</span></button>
         <div className="side-divider"/>
         <div className="side-label">OTHER DASHBOARDS</div>
         <button className="side-link" onClick={()=>go("farmer")}><Leaf size={18}/><span>Farmer</span></button>
@@ -116,9 +118,11 @@ function MobileBottomNav({page,go}:{page:Page;go:(p:Page)=>void}){
   return <nav className="mobile-bottom-nav" aria-label="Mobile navigation">{items.map(([id,label,Icon])=><button key={id} className={page===id?"active":""} onClick={()=>go(id)}><Icon size={19}/><span>{label}</span></button>)}</nav>;
 }
 
+function LanguageSelect({language,setLanguage}:{language:"en"|"te"|"hi";setLanguage:(language:"en"|"te"|"hi")=>void}){return <select className="language-select" value={language} onChange={e=>setLanguage(e.target.value as "en"|"te"|"hi")} aria-label="Language"><option value="en">EN</option><option value="te">తెలుగు</option><option value="hi">हिन्दी</option></select>}
+
 function PublicLayout({page,go}:{page:Page;go:(p:Page)=>void}){
   return <div className="public">
-    <header className="public-nav"><button className="brand" onClick={()=>go("home")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button><nav><button onClick={()=>go("home")}>Home</button><button>About</button><button>Features</button><button>Contact</button></nav><div><button className="outline-btn" onClick={()=>go("login")}>Login</button><button className="primary-btn compact" onClick={()=>go("register")}>Register</button></div></header>
+    <header className="public-nav"><button className="brand" onClick={()=>go("home")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button><nav><button onClick={()=>go("home")}>Home</button><button>About</button><button>Features</button><button>Contact</button></nav><div><LanguageSelect language={useLanguage().language} setLanguage={useLanguage().setLanguage}/><button className="outline-btn" onClick={()=>go("login")}>{useLanguage().t("login")}</button><button className="primary-btn compact" onClick={()=>go("register")}>{useLanguage().t("register")}</button></div></header>
     {page==="home"&&<Landing go={go}/>}
     {page==="login"&&<Login go={go}/>}
     {page==="register"&&<Register go={go}/>}
