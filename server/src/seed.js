@@ -8,6 +8,44 @@ import Event from "./models/Event.js";
 
 const schemes = [
   {
+    title: "Rythu Bharosa",
+    description: "Telangana agriculture support information for eligible farmers.",
+    domain: "farmer",
+    category: "Agriculture Support",
+    sourceName: "Government of Telangana",
+    officialUrl: "https://www.rythubharosa.telangana.gov.in/Default_Home.aspx",
+    tags: ["farmer", "rythu bharosa", "agriculture"]
+  },
+  {
+    title: "Aasara Pensions",
+    description: "Telangana social-security pension information and official beneficiary resources.",
+    domain: "senior_citizen",
+    category: "Pension",
+    sourceName: "Government of Telangana",
+    officialUrl: "https://www.aasara.telangana.gov.in/",
+    tags: ["senior citizen", "pension", "aasara"]
+  },
+  {
+    title: "Telangana ePASS Post-Matric Scholarships",
+    description: "Official Telangana portal for post-matric scholarship services and registrations.",
+    domain: "student",
+    category: "Scholarship",
+    sourceName: "Government of Telangana",
+    officialUrl: "https://telanganaepass.cgg.gov.in/",
+    applicationUrl: "https://telanganaepass.cgg.gov.in/",
+    tags: ["student", "scholarship", "epass"]
+  },
+  {
+    title: "DigiLocker",
+    description: "Official digital document service for accessing and sharing verified documents.",
+    domain: "other",
+    category: "Citizen Service",
+    sourceName: "Government of India",
+    officialUrl: "https://www.digilocker.gov.in/",
+    applicationUrl: "https://www.digilocker.gov.in/",
+    tags: ["documents", "certificates", "digilocker"]
+  },
+  {
     title: "Student Scholarship Discovery",
     description: "Central and Telangana education support programs matched to student eligibility.",
     domain: "student",
@@ -36,7 +74,7 @@ const schemes = [
     description: "Find welfare, pension and social-support information relevant to senior citizens.",
     domain: "senior_citizen",
     category: "Welfare",
-    officialUrl: "https://www.tnsocialwelfare.tn.gov.in/",
+    officialUrl: "https://www.aasara.telangana.gov.in/",
     tags: ["senior citizen", "welfare", "pension"]
   },
   {

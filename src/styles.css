@@ -9,3 +9,28 @@
 .primary-btn:disabled{opacity:.6;cursor:not-allowed}
 .occupation-grid button.selected{border-color:#159c9a;background:#effafa;color:#0877b8;box-shadow:0 0 0 2px #159c9a22}
 .chips button.selected-chip{border-color:#149b8f;background:#e8f8f5;color:#097e75;font-weight:700}
+
+.mobile-bottom-nav{display:none}
+.card-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.card-actions a{text-decoration:none}
+.empty-state{background:#fff;border:1px dashed #cbdbe4;border-radius:14px;padding:40px 20px;text-align:center;color:#718795}
+.empty-state h3{margin:12px 0 4px;color:#244d67}
+.empty-state p{margin:0;font-size:11px}
+.skeleton-card{min-height:245px;background:linear-gradient(90deg,#f7fafb,#eef4f7,#f7fafb);background-size:200% 100%;animation:skeleton 1.4s infinite}
+@keyframes skeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media(max-width:800px){
+  .app-shell{padding-bottom:68px}
+  .mobile-bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:0;right:0;bottom:0;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid #dfe8ef;z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+  .mobile-bottom-nav button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;color:#78909f;font-size:9px;font-weight:700}
+  .mobile-bottom-nav button.active{color:#0877b8}
+  .mobile-bottom-nav button svg{width:19px;height:19px}
+}
+
+.admin-page{max-width:1180px}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.admin-panel{padding:20px}
+.admin-panel h2{font-size:16px;margin:0 0 15px}
+.admin-panel textarea{width:100%;min-height:120px;border:1px solid #d6e2ea;border-radius:8px;padding:11px 12px;margin-top:6px;outline:none;resize:vertical;font-family:inherit}
+.admin-divider{text-align:center;color:#98aab7;font-size:10px;font-weight:800;letter-spacing:.1em;padding:12px}
+.full{width:100%}
+@media(max-width:800px){.admin-grid{grid-template-columns:1fr}}
