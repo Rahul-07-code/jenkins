@@ -10,6 +10,7 @@ import SchemesData from "./components/Schemes";
 import AdminDashboard from "./components/AdminDashboard";
 import SavedPage from "./components/SavedPage";
 import { useLanguage } from "./lib/i18n";
+import ServicesPage from "./components/ServicesPage";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -18,7 +19,7 @@ type Page =
   | "home" | "login" | "register" | "occupation" | "student-details"
   | "student" | "schemes" | "exams" | "competitions" | "digilocker"
   | "farmer" | "msp" | "shops" | "ai" | "government" | "private"
-  | "business" | "senior" | "other" | "settings" | "admin" | "saved";
+  | "business" | "senior" | "other" | "settings" | "admin" | "saved" | "services";
 
 const navItems = [
   ["student","Dashboard",Home],["schemes","Schemes",GraduationCap],
@@ -67,7 +68,7 @@ function App(){
   if(["home","login","register","occupation","student-details"].includes(page))
     return <PublicLayout page={page} go={go}/>;
 
-  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings",admin:"Admin Console",saved:"Saved & Activity"};
+  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings",admin:"Admin Console",saved:"Saved & Activity",services:"Government Services"};
   const isFarmer=["farmer","msp","shops"].includes(page);
   const isOther=["government","private","business","senior","other"].includes(page);
 
@@ -82,6 +83,7 @@ function App(){
       <aside className={mobileOpen?"sidebar open":"sidebar"}>
         <div className="profile-mini"><div className="avatar large">{initials(currentUser?.name)}</div><div><strong>{currentUser?.name || "Citizen"}</strong><span>{currentUser?.profile?.occupation ? currentUser.profile.occupation.replace("_"," ") : "Citizen"} · {currentUser?.profile?.district || "Telangana"}</span></div></div>
         <div className="side-label">PERSONALIZED</div>
+        <button className={page==="services"?"side-link active":"side-link"} onClick={()=>go("services")}><Building2 size={18}/><span>{t("services")}</span></button>
         {navItems.map(([id,label,Icon])=><button key={id} className={page===id?"side-link active":"side-link"} onClick={()=>go(id as Page)}><Icon size={18}/><span>{label}</span>{id==="schemes"&&<em>8</em>}</button>)}<button className={page==="saved"?"side-link active":"side-link"} onClick={()=>go("saved")}><CalendarClock size={18}/><span>{t("saved")}</span></button>
         <div className="side-divider"/>
         <div className="side-label">OTHER DASHBOARDS</div>
@@ -106,6 +108,7 @@ function App(){
         {isOther&&<OtherDashboard kind={page} go={go}/>}
         {page==="settings"&&<SettingsPage/>}
         {page==="saved"&&<SavedPage/>}
+        {page==="services"&&<ServicesPage/>}
         {page==="admin"&&currentUser?.role==="admin"&&<AdminDashboard/>}
       </main>
     </div>
