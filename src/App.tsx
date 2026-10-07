@@ -6,6 +6,7 @@ import {
   Trophy, UserRound, Users, X, WalletCards, Wheat, ClipboardList, CircleHelp
 } from "lucide-react";
 import { apiFetch, getStoredUser, saveSession } from "./lib/api";
+import SchemesData from "./components/Schemes";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -195,10 +196,8 @@ function StudentDetails({go}:{go:(p:Page)=>void}){
 
 function Progress({current}:{current:number}){return <div className="progress"><div className="progress-line"/>{[1,2,3].map(i=><span className={i<=current?"done":""} key={i}>{i<current?"✓":i}</span>)}</div>}
 
-const schemes=[["Post-Matric Scholarship","For SC/ST/BC/EBC students","30 Apr 2026","Scholarship",GraduationCap],["Telangana Overseas Scholarship","For higher studies abroad","15 May 2026","Scholarship",Trophy],["Fee Reimbursement Scheme","For eligible students","20 Apr 2026","Education Support",WalletCards],["Telangana Vidya Bharosa","Educational support scheme","30 Apr 2026","Education Support",BookOpen]];
-function Schemes(){return <><PageHeader title="Student Schemes" subtitle="Discover benefits and financial support personalized for your education."/><div className="filterbar"><button className="active">All</button><button>Scholarships</button><button>Fee Reimbursement</button><button>Education Support</button><div className="spacer"/><div className="small-search"><Search size={16}/><input placeholder="Search schemes"/></div></div><div className="scheme-grid">{schemes.map(([t,d,deadline,tag,I])=><article className="scheme-card" key={t as string}><div className="scheme-icon"><I size={21}/></div><div className="scheme-tag">{tag as string}</div><h3>{t as string}</h3><p>{d as string}</p><div className="deadline"><CalendarDays size={15}/><span>Last date: <b>{deadline as string}</b></span></div><button className="primary-btn small">Apply Now</button></article>)}</div></>}
+function Schemes(){return <SchemesData PageHeader={PageHeader}/>}
 
-const exams=[["TS EAMCET 2025","Engineering Entrance Exam for Telangana","10 Apr 2025"],["JEE Advanced 2025","For JEE Main qualified candidates","05 May 2025"],["TS ECET 2025","For Diploma holders (Lateral Entry)","30 Apr 2025"],["NDA 2025","National Defence Academy","01 Jun 2025"],["BITSAT 2025","Birla Institute of Technology and Science","10 Oct 2025"]];
 function Exams(){return <><PageHeader title="Exams & Opportunities" subtitle="Track important entrance exams and opportunities before their deadlines."/><div className="filterbar"><button className="active">All</button><button>Entrance Exams</button><button>Scholarships</button><button>Competitions</button><button>Sports</button></div><div className="list-card">{exams.map(([t,d,date],i)=><div className="list-row" key={t}><div className="date-box"><b>{date.split(" ")[0]}</b><span>{date.split(" ")[1]?.slice(0,3)}</span></div><div className="row-main"><h3>{t}</h3><p>{d}</p><small>Registration last date: {date}</small></div><button className="outline-btn small">Visit</button></div>)}</div></>}
 
 const competitions=[["IMO - International Mathematics Olympiad","For Classes 1-12","15 Sep 2025",Trophy],["NSO - National Science Olympiad","For Classes 1-12","20 Sep 2025",Sparkles],["Spell Bee Competition","For Classes 1-10","30 Aug 2025",BookOpen],["U-15 Cricket Tournament","For School Students (Under 15)","10 Jul 2025",Trophy],["State Level Science Fair","For School Students","25 Aug 2025",Sparkles]];
