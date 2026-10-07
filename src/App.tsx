@@ -194,7 +194,7 @@ function StudentDetails({go}:{go:(p:Page)=>void}){
     const finalDraft={...getRegistrationDraft(),education,interests,landSize,crops,businessType};
     setLoading(true);
     try {
-      const data=await apiFetch("/auth/register",{method:"POST",body:JSON.stringify({name:finalDraft.name,email:finalDraft.email,password:finalDraft.password,profile:{occupation:domainMap[persona]||"other",dateOfBirth:finalDraft.dateOfBirth,gender:finalDraft.gender,state:"Telangana",district:finalDraft.district,mandal:finalDraft.mandal,education,interests}})});
+      const data=await apiFetch("/auth/register",{method:"POST",body:JSON.stringify({name:finalDraft.name,email:finalDraft.email,password:finalDraft.password,profile:{occupation:domainMap[persona]||"other",dateOfBirth:finalDraft.dateOfBirth,gender:finalDraft.gender,state:"Telangana",district:finalDraft.district,mandal:finalDraft.mandal,education,interests,crops:finalDraft.crops?finalDraft.crops.split(",").map((x:string)=>x.trim()).filter(Boolean):[],landSize:finalDraft.landSize?Number(finalDraft.landSize):undefined,businessType:finalDraft.businessType}})});
       saveSession(data);
       clearRegistrationDraft();
       go((destinationMap[persona]||"other") as Page);
