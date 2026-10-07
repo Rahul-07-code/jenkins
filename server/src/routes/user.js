@@ -3,6 +3,9 @@ import User from "../models/User.js";
 import Bookmark from "../models/Bookmark.js";
 import Reminder from "../models/Reminder.js";
 import Notification from "../models/Notification.js";
+import Scheme from "../models/Scheme.js";
+import Service from "../models/Service.js";
+import Event from "../models/Event.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
@@ -29,7 +32,17 @@ router.patch("/me", async (req, res, next) => {
 
 router.get("/bookmarks", async (req, res, next) => {
   try {
-    res.json(await Bookmark.find({ user: req.user.sub }).sort({ createdAt: -1 }).lean());
+    const bookmarks = await Bookmark.find({ user: req.user.sub }).sort({ createdAt: -1 }).lean();
+    const [schemes, services, events] = await Promise.all([
+      Promise.all(bookmarks.filter((item) => item.resourceType === "scheme").map((item) => Scheme.findById(item.resourceId).lean())),
+      Promise.all(bookmarks.filter((item) => item.resourceType === "service").map((item) => Service.findById(item.resourceId).lean())),
+      Promise.all(bookmarks.filter((item) => item.resourceType === "event").map((item) => Event.findById(item.resourceId).lean()))
+    ]);
+    const byKey = new Map();
+    schemes.filter(Boolean).forEach((item) => byKey.set("scheme:" + item._id, item));
+    services.filter(Boolean).forEach((item) => byKey.set("service:" + item._id, item));
+    events.filter(Boolean).forEach((item) => byKey.set("event:" + item._id, item));
+    res.json(bookmarks.map((item) => ({ ...item, resource: byKey.get(item.resourceType + ":" + item.resourceId) || null })));
   } catch (error) { next(error); }
 });
 

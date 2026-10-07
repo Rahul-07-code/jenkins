@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowRight, Bell, BookOpen, Bot, BriefcaseBusiness, Building2, CalendarDays,
+  ArrowRight, Bell, BookOpen, Bot, BriefcaseBusiness, Building2, CalendarDays, CalendarClock,
   CheckCircle2, ChevronRight, CloudSun, FileText, GraduationCap, Home, Landmark,
   Leaf, Menu, MessageCircle, Search, Settings, ShieldCheck, ShoppingBag, Sparkles,
   Trophy, UserRound, Users, X, WalletCards, Wheat, ClipboardList, CircleHelp
@@ -8,6 +8,10 @@ import {
 import { apiFetch, getStoredUser, saveSession } from "./lib/api";
 import SchemesData from "./components/Schemes";
 import AdminDashboard from "./components/AdminDashboard";
+import SavedPage from "./components/SavedPage";
+import { useLanguage } from "./lib/i18n";
+import ServicesPage from "./components/ServicesPage";
+import EventsPage from "./components/EventsPage";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -16,7 +20,7 @@ type Page =
   | "home" | "login" | "register" | "occupation" | "student-details"
   | "student" | "schemes" | "exams" | "competitions" | "digilocker"
   | "farmer" | "msp" | "shops" | "ai" | "government" | "private"
-  | "business" | "senior" | "other" | "settings" | "admin";
+  | "business" | "senior" | "other" | "settings" | "admin" | "saved" | "services";
 
 const navItems = [
   ["student","Dashboard",Home],["schemes","Schemes",GraduationCap],
@@ -46,6 +50,7 @@ function initials(name:string = "Citizen"){
 }
 
 function App(){
+  const { language, setLanguage, t } = useLanguage();
   const [page,setPage]=useState<Page>("home");
   const [currentUser,setCurrentUser]=useState<any>(()=>getStoredUser());
   const [mobileOpen,setMobileOpen]=useState(false);
@@ -64,27 +69,28 @@ function App(){
   if(["home","login","register","occupation","student-details"].includes(page))
     return <PublicLayout page={page} go={go}/>;
 
-  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings",admin:"Admin Console"};
+  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings",admin:"Admin Console",saved:"Saved & Activity",services:"Government Services"};
   const isFarmer=["farmer","msp","shops"].includes(page);
   const isOther=["government","private","business","senior","other"].includes(page);
 
   return <div className="app-shell">
     <header className="topbar">
       <button className="brand" onClick={()=>go("student")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button>
-      <div className="top-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search schemes, exams, services..."/></div>
-      <div className="top-actions"><button aria-label="help"><CircleHelp size={19}/></button><button aria-label="notifications"><Bell size={19}/></button><button className="avatar">RK</button></div>
+      <div className="top-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={t("search")}/></div><LanguageSelect language={language} setLanguage={setLanguage}/>
+      <div className="top-actions"><button aria-label="help"><CircleHelp size={19}/></button><button aria-label="notifications" onClick={()=>go("saved")}><Bell size={19}/></button><button className="avatar" onClick={()=>go("settings")}>{initials(currentUser?.name)}</button></div>
       <button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X/>:<Menu/>}</button>
     </header>
     <div className="workspace">
       <aside className={mobileOpen?"sidebar open":"sidebar"}>
         <div className="profile-mini"><div className="avatar large">{initials(currentUser?.name)}</div><div><strong>{currentUser?.name || "Citizen"}</strong><span>{currentUser?.profile?.occupation ? currentUser.profile.occupation.replace("_"," ") : "Citizen"} · {currentUser?.profile?.district || "Telangana"}</span></div></div>
         <div className="side-label">PERSONALIZED</div>
-        {navItems.map(([id,label,Icon])=><button key={id} className={page===id?"side-link active":"side-link"} onClick={()=>go(id as Page)}><Icon size={18}/><span>{label}</span>{id==="schemes"&&<em>8</em>}</button>)}
+        <button className={page==="services"?"side-link active":"side-link"} onClick={()=>go("services")}><Building2 size={18}/><span>{t("services")}</span></button>
+        {navItems.map(([id,label,Icon])=><button key={id} className={page===id?"side-link active":"side-link"} onClick={()=>go(id as Page)}><Icon size={18}/><span>{label}</span>{id==="schemes"&&<em>8</em>}</button>)}<button className={page==="saved"?"side-link active":"side-link"} onClick={()=>go("saved")}><CalendarClock size={18}/><span>{t("saved")}</span></button>
         <div className="side-divider"/>
         <div className="side-label">OTHER DASHBOARDS</div>
         <button className="side-link" onClick={()=>go("farmer")}><Leaf size={18}/><span>Farmer</span></button>
         <button className="side-link" onClick={()=>go("government")}><Landmark size={18}/><span>Government Employee</span></button>
-        <button className="side-link" onClick={()=>go("business")}><BriefcaseBusiness size={18}/><span>Business Owner</span></button>
+        <button className="side-link" onClick={()=>go("business")}><BriefcaseBusiness size={18}/><span>Business Owner</span></button><button className="side-link" onClick={()=>go("senior")}><Users size={18}/><span>Senior Citizen</span></button><button className="side-link" onClick={()=>go("other")}><UserRound size={18}/><span>Other Citizen</span></button>
         <button className="side-link" onClick={()=>go("senior")}><Users size={18}/><span>Senior Citizen</span></button>
         <button className="side-link" onClick={()=>go("other")}><UserRound size={18}/><span>Other Citizen</span></button>
         {currentUser?.role==="admin"&&<button className="side-link" onClick={()=>go("admin")}><ShieldCheck size={18}/><span>Admin Console</span></button>}
@@ -93,8 +99,8 @@ function App(){
         <div className="breadcrumb"><span>Praja Sathi</span><ChevronRight size={14}/><b>{titleMap[page]}</b></div>
         {page==="student"&&<StudentDashboard go={go}/>}
         {page==="schemes"&&<Schemes/>}
-        {page==="exams"&&<Exams/>}
-        {page==="competitions"&&<Competitions/>}
+        {page==="exams"&&<EventsPage kind="exams"/>}
+        {page==="competitions"&&<EventsPage kind="competitions"/>}
         {page==="digilocker"&&<DigiLocker/>}
         {page==="farmer"&&<FarmerDashboard go={go}/>}
         {page==="msp"&&<MSP/>}
@@ -102,6 +108,8 @@ function App(){
         {page==="ai"&&<AI chat={chat} setChat={setChat} message={message} setMessage={setMessage}/>}
         {isOther&&<OtherDashboard kind={page} go={go}/>}
         {page==="settings"&&<SettingsPage/>}
+        {page==="saved"&&<SavedPage/>}
+        {page==="services"&&<ServicesPage/>}
         {page==="admin"&&currentUser?.role==="admin"&&<AdminDashboard/>}
       </main>
     </div>
@@ -110,13 +118,16 @@ function App(){
 }
 
 function MobileBottomNav({page,go}:{page:Page;go:(p:Page)=>void}){
-  const items=[["student","Home",Home],["schemes","Schemes",Landmark],["ai","Sathi AI",Bot],["settings","Profile",Settings]] as const;
+  const items=[["student","Home",Home],["schemes","Schemes",Landmark],["saved","Saved",CalendarDays],["ai","Sathi AI",Bot]] as const;
   return <nav className="mobile-bottom-nav" aria-label="Mobile navigation">{items.map(([id,label,Icon])=><button key={id} className={page===id?"active":""} onClick={()=>go(id)}><Icon size={19}/><span>{label}</span></button>)}</nav>;
 }
 
+function LanguageSelect({language,setLanguage}:{language:"en"|"te"|"hi";setLanguage:(language:"en"|"te"|"hi")=>void}){return <select className="language-select" value={language} onChange={e=>setLanguage(e.target.value as "en"|"te"|"hi")} aria-label="Language"><option value="en">EN</option><option value="te">తెలుగు</option><option value="hi">हिन्दी</option></select>}
+
 function PublicLayout({page,go}:{page:Page;go:(p:Page)=>void}){
+  const { language, setLanguage, t } = useLanguage();
   return <div className="public">
-    <header className="public-nav"><button className="brand" onClick={()=>go("home")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button><nav><button onClick={()=>go("home")}>Home</button><button>About</button><button>Features</button><button>Contact</button></nav><div><button className="outline-btn" onClick={()=>go("login")}>Login</button><button className="primary-btn compact" onClick={()=>go("register")}>Register</button></div></header>
+    <header className="public-nav"><button className="brand" onClick={()=>go("home")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button><nav><button onClick={()=>go("home")}>{t("home")}</button><button>About</button><button>Features</button><button>Contact</button></nav><div><LanguageSelect language={language} setLanguage={setLanguage}/><button className="outline-btn" onClick={()=>go("login")}>{t("login")}</button><button className="primary-btn compact" onClick={()=>go("register")}>{t("register")}</button></div></header>
     {page==="home"&&<Landing go={go}/>}
     {page==="login"&&<Login go={go}/>}
     {page==="register"&&<Register go={go}/>}
@@ -192,7 +203,7 @@ function StudentDetails({go}:{go:(p:Page)=>void}){
     const finalDraft={...getRegistrationDraft(),education,interests,landSize,crops,businessType};
     setLoading(true);
     try {
-      const data=await apiFetch("/auth/register",{method:"POST",body:JSON.stringify({name:finalDraft.name,email:finalDraft.email,password:finalDraft.password,profile:{occupation:domainMap[persona]||"other",dateOfBirth:finalDraft.dateOfBirth,gender:finalDraft.gender,state:"Telangana",district:finalDraft.district,mandal:finalDraft.mandal,education,interests}})});
+      const data=await apiFetch("/auth/register",{method:"POST",body:JSON.stringify({name:finalDraft.name,email:finalDraft.email,password:finalDraft.password,profile:{occupation:domainMap[persona]||"other",dateOfBirth:finalDraft.dateOfBirth,gender:finalDraft.gender,state:"Telangana",district:finalDraft.district,mandal:finalDraft.mandal,education,interests,crops:finalDraft.crops?finalDraft.crops.split(",").map((x:string)=>x.trim()).filter(Boolean):[],landSize:finalDraft.landSize?Number(finalDraft.landSize):undefined,businessType:finalDraft.businessType}})});
       saveSession(data);
       clearRegistrationDraft();
       go((destinationMap[persona]||"other") as Page);
@@ -216,13 +227,32 @@ function Competitions(){return <><PageHeader title="Competitions & Events" subti
 
 function DigiLocker(){return <div className="digilocker"><div className="digi-hero"><div><span className="digi-logo"><ShieldCheck/></span><span className="eyebrow">SECURE DOCUMENTS</span><h1>DigiLocker</h1><p>Your digital documents, always with you.</p><div className="digi-points"><span>✓ Mark sheets</span><span>✓ Passing certificates</span><span>✓ Aadhaar, PAN and other documents</span><span>✓ Easy sharing and verification</span></div><button className="primary-btn">Go to DigiLocker <ArrowRight size={16}/></button></div><div className="document-stack"><FileText/><FileText/><FileText/></div></div><div className="doc-grid">{["Marksheets","Passing Certificates","Identity Documents"].map((x,i)=><div className="doc-card" key={x}><FileText/><div><b>{x}</b><span>{i+2} documents</span></div><ChevronRight/></div>)}</div></div>}
 
-function StudentDashboard({go}:{go:(p:Page)=>void}){return <><div className="welcome-banner"><div><span className="eyebrow">STUDENT DASHBOARD</span><h1>Good Morning, Rahul <span>👋</span></h1><p>Intermediate 2nd Year · MPC<br/><b>Hyderabad, Telangana</b></p><button className="outline-btn small">Edit Profile</button></div><div className="student-illustration"><GraduationCap size={68}/></div></div><div className="stat-grid">{[["Schemes","8 relevant",Landmark],["Exams","12 upcoming",CalendarDays],["Competitions","6 upcoming",Trophy],["Opportunities","4 new",Sparkles]].map(([t,v,I])=><div className="stat-card" key={t as string}><span className="icon-tile"><I size={20}/></span><div><b>{t as string}</b><strong>{v as string}</strong></div></div>)}</div><section className="section"><SectionTitle title="Quick Actions"/><div className="quick-grid"><Quick icon={ShieldCheck} title="DigiLocker" text="Access your documents" onClick={()=>go("digilocker")}/><Quick icon={Bot} title="Ask Sathi AI" text="Get instant answers" onClick={()=>go("ai")}/><Quick icon={Settings} title="Profile & Settings" text="Update your details" onClick={()=>go("settings")}/></div></section><section className="section two-col"><div><SectionTitle title="Upcoming Deadlines"/><div className="deadline-card"><CalendarDays/><div><b>TS EAMCET 2025</b><span>Engineering Entrance Exam</span></div><strong>10 Apr 2025</strong><button>View</button></div><div className="deadline-card"><GraduationCap/><div><b>Post-Matric Scholarship</b><span>For Intermediate / Degree Students</span></div><strong>30 Apr 2025</strong><button>View</button></div></div><div className="side-highlight"><span className="icon-tile"><Bot/></span><h3>Need help?</h3><p>Sathi AI can help you find schemes, deadlines and opportunities.</p><button className="primary-btn small" onClick={()=>go("ai")}>Ask Sathi AI</button></div></section></>}
+function StudentDashboard({go}:{go:(p:Page)=>void}){
+  const user=getStoredUser<any>() || {};
+  const [schemes,setSchemes]=useState<any[]>([]);
+  useEffect(()=>{ apiFetch("/schemes/personalized").then(setSchemes).catch(()=>setSchemes([])); },[]);
+  const name=user.name || "Citizen";
+  const education=user.profile?.education || "Student";
+  const district=user.profile?.district || "Telangana";
+  const interests=user.profile?.interests || [];
+  const relevant=schemes.filter((item)=>item.relevanceScore>0);
+  return <><div className="welcome-banner"><div><span className="eyebrow">STUDENT DASHBOARD</span><h1>Good Morning, {name} <span>👋</span></h1><p>{education}{interests.length? " · "+interests.slice(0,2).join(" · "):""}<br/><b>{district}, Telangana</b></p><button className="outline-btn small" onClick={()=>go("settings")}>Edit Profile</button></div><div className="student-illustration"><GraduationCap size={68}/></div></div><div className="stat-grid">{[["Schemes",relevant.length+" relevant",Landmark],["Exams","Explore upcoming",CalendarDays],["Competitions","Explore events",Trophy],["Opportunities","Personalized",Sparkles]].map(([t,v,I])=><div className="stat-card" key={t as string}><span className="icon-tile"><I size={20}/></span><div><b>{t as string}</b><strong>{v as string}</strong></div></div>)}</div><section className="section"><SectionTitle title="Quick Actions"/><div className="quick-grid"><Quick icon={ShieldCheck} title="DigiLocker" text="Access your documents" onClick={()=>go("digilocker")}/><Quick icon={Bot} title="Ask Sathi AI" text="Get instant answers" onClick={()=>go("ai")}/><Quick icon={CalendarClock} title="Saved & Reminders" text="Track important items" onClick={()=>go("saved")}/></div></section><section className="section two-col"><div><SectionTitle title="Relevant Schemes"/>{relevant.slice(0,3).map((item)=><div className="deadline-card" key={item._id}><Landmark/><div><b>{item.title}</b><span>{item.description}</span></div><strong>{item.relevanceScore}%</strong><button onClick={()=>go("schemes")}>View</button></div>)}{relevant.length===0&&<div className="empty-state"><Landmark/><h3>No matched schemes yet</h3><p>Complete your profile or add interests to improve recommendations.</p></div>}</div><div className="side-highlight"><span className="icon-tile"><Bot/></span><h3>Need help?</h3><p>Sathi AI can explain schemes and guide you to official sources.</p><button className="primary-btn small" onClick={()=>go("ai")}>Ask Sathi AI</button></div></section></>
+}
 
 function Quick({icon:Icon,title,text,onClick}:{icon:any;title:string;text:string;onClick:()=>void}){return <button className="quick-card" onClick={onClick}><span className="icon-tile"><Icon/></span><span><b>{title}</b><small>{text}</small></span><ChevronRight/></button>}
 function SectionTitle({title}:{title:string}){return <div className="section-title"><h2>{title}</h2><button>View all</button></div>}
 function PageHeader({title,subtitle}:{title:string;subtitle:string}){return <div className="page-header"><div><span className="eyebrow">PRAJA SATHI</span><h1>{title}</h1><p>{subtitle}</p></div><button className="outline-btn">Download / Share</button></div>}
 
-function FarmerDashboard({go}:{go:(p:Page)=>void}){return <><div className="farmer-banner" style={{backgroundImage:`linear-gradient(90deg,rgba(6,62,47,.9),rgba(6,62,47,.35)),url(${farmerImage})`}}><div><span className="eyebrow light">FARMER DASHBOARD</span><h1>Good Morning, Ramesh 🌾</h1><p>Farmer · Karimnagar, Telangana</p><button className="outline-btn light-btn">Edit Profile</button></div></div><div className="stat-grid">{[["Schemes","6 relevant",Landmark],["MSP Info","5 crops",WalletCards],["Agri Shops","12 nearby",ShoppingBag],["Weather","Live updates",CloudSun]].map(([t,v,I])=><div className="stat-card" key={t as string}><span className="icon-tile green"><I size={20}/></span><div><b>{t as string}</b><strong>{v as string}</strong></div></div>)}</div><section className="section"><SectionTitle title="Your Crops"/><div className="crop-grid">{["Paddy","Cotton","Maize"].map(x=><div className="crop-card" key={x}><Wheat/><b>{x}</b><span>View crop details</span></div>)}<button className="crop-card add"><span>+</span><b>Add Crop</b></button></div></section><section className="section"><SectionTitle title="Quick Actions"/><div className="quick-grid"><Quick icon={WalletCards} title="Check MSP Prices" text="Current crop MSP" onClick={()=>go("msp")}/><Quick icon={ShoppingBag} title="Find Nearby Shops" text="Agri inputs & prices" onClick={()=>go("shops")}/><Quick icon={Bot} title="Ask Sathi AI" text="Farming guidance" onClick={()=>go("ai")}/></div></section></>}
+function FarmerDashboard({go}:{go:(p:Page)=>void}){
+  const user=getStoredUser<any>() || {};
+  const [schemes,setSchemes]=useState<any[]>([]);
+  useEffect(()=>{ apiFetch("/schemes/personalized").then(setSchemes).catch(()=>setSchemes([])); },[]);
+  const name=user.name || "Farmer";
+  const district=user.profile?.district || "Telangana";
+  const crops=user.profile?.crops || [];
+  const relevant=schemes.filter((item)=>item.relevanceScore>0);
+  return <><div className="farmer-banner" style={{backgroundImage:`linear-gradient(90deg,rgba(6,62,47,.9),rgba(6,62,47,.35)),url(${farmerImage})`}}><div><span className="eyebrow light">FARMER DASHBOARD</span><h1>Good Morning, {name} 🌾</h1><p>Farmer · {district}, Telangana</p><button className="outline-btn light-btn" onClick={()=>go("settings")}>Edit Profile</button></div></div><div className="stat-grid">{[["Schemes",relevant.length+" relevant",Landmark],["MSP Info","Official data",WalletCards],["Agri Shops","Explore nearby",ShoppingBag],["Guidance","Ask Sathi AI",Bot]].map(([t,v,I])=><div className="stat-card" key={t as string}><span className="icon-tile green"><I size={20}/></span><div><b>{t as string}</b><strong>{v as string}</strong></div></div>)}</div><section className="section"><SectionTitle title="Your Crops"/><div className="crop-grid">{(crops.length?crops:["Add your first crop"]).map((x:string)=><div className="crop-card" key={x}><Wheat/><b>{x}</b><span>Personalized crop information</span></div>)}<button className="crop-card add" onClick={()=>go("settings")}><span>+</span><b>Add Crop</b></button></div></section><section className="section"><SectionTitle title="Quick Actions"/><div className="quick-grid"><Quick icon={WalletCards} title="Check MSP Prices" text="Current crop MSP" onClick={()=>go("msp")}/><Quick icon={ShoppingBag} title="Find Nearby Shops" text="Agri inputs & prices" onClick={()=>go("shops")}/><Quick icon={Bot} title="Ask Sathi AI" text="Farming guidance" onClick={()=>go("ai")}/></div></section></>
+}
 
 const msp=[["Paddy","2,320","Yes"],["Cotton","7,521","Yes"],["Maize","2,090","Yes"],["Red Gram (Tur)","7,000","Limited"],["Green Gram","8,682","Limited"],["Black Gram","7,400","Limited"],["Groundnut","6,783","Yes"]];
 function MSP(){return <><PageHeader title="MSP & Procurement" subtitle="Track minimum support prices and procurement availability."/><div className="filterbar"><button className="active">MSP Prices</button><button>Procurement Centres</button><button>Market Prices</button></div><div className="table-card"><table><thead><tr><th>Crop</th><th>MSP (₹ / Quintal)</th><th>Telangana Procurement</th><th>Actions</th></tr></thead><tbody>{msp.map(r=><tr key={r[0]}><td><b>{r[0]}</b></td><td>₹ {r[1]}</td><td><span className={r[2]==="Yes"?"status green":"status amber"}>{r[2]}</span></td><td><button className="link">View Details</button></td></tr>)}</tbody></table></div></>}
@@ -254,6 +284,6 @@ function AI({chat,setChat,message,setMessage}:{chat:any[];setChat:(value:any[])=
 
 function OtherDashboard({kind,go}:{kind:string;go:(p:Page)=>void}){const data:any={government:["Government Employee","Employee Services","Government Circulars","Pension Information","Important Notifications",Landmark],private:["Private Employee / IT Professional","Relevant Scheme","Skill Development Programs","Hackathons & Opportunities","Government Services",BriefcaseBusiness],business:["Business Owner","Business Schemes","MSME Support","Registrations & Licenses","Government Tenders",Building2],senior:["Senior Citizen","Pension Schemes","Healthcare Services","Important Contacts","Document Services",Users],other:["Other Citizen","Government Schemes","Citizen Services","Important Notices","Help & Guidance",UserRound]}[kind] || ["Other Citizen","Government Schemes","Citizen Services","Important Notices","Help & Guidance",UserRound];const Icon=data[5];return <><div className="page-header"><div><span className="eyebrow">CITIZEN SERVICES</span><h1>{data[0]}</h1><p>Personalized services and important information in one place.</p></div><button className="primary-btn" onClick={()=>go("ai")}>Ask Sathi AI</button></div><div className="other-grid">{data.slice(1,5).map((x:string)=><article key={x} className="other-card"><span className="icon-tile"><Icon size={22}/></span><h3>{x}</h3><p>Explore personalized information, applications and updates.</p><button className="link">Explore <ArrowRight size={15}/></button></article>)}</div><div className="notice"><Bell/><div><b>Important notifications</b><p>Check deadlines and service updates regularly to avoid missing important opportunities.</p></div></div></>}
 
-function SettingsPage(){return <><PageHeader title="Profile & Settings" subtitle="Manage your personal information and preferences."/><div className="settings-layout"><div className="profile-card"><div className="avatar xlarge">RK</div><h2>Rahul Kumar</h2><p>Student · Intermediate 2nd Year · MPC</p><button className="outline-btn small">Edit Profile</button></div><div className="settings-card">{["Personal Information","Education Details","Interests","Location","Language Preference","Change Password"].map((x,i)=><button key={x}><span className="icon-tile">{[UserRound,GraduationCap,Sparkles,Building2,MessageCircle,ShieldCheck][i]({size:18})}</span><span><b>{x}</b><small>Manage your {x.toLowerCase()}</small></span><ChevronRight/></button>)}</div></div></>}
+function SettingsPage(){return <><PageHeader title="Profile & Settings" subtitle="Manage your personal information and preferences."/><div className="settings-layout"><div className="profile-card"><div className="avatar xlarge">{initials(getStoredUser<any>()?.name)}</div><h2>{getStoredUser<any>()?.name || "Citizen"}</h2><p>{getStoredUser<any>()?.profile?.education || "Citizen"} · {getStoredUser<any>()?.profile?.district || "Telangana"}</p><button className="outline-btn small">Edit Profile</button></div><div className="settings-card">{["Personal Information","Education Details","Interests","Location","Language Preference","Change Password"].map((x,i)=><button key={x}><span className="icon-tile">{[UserRound,GraduationCap,Sparkles,Building2,MessageCircle,ShieldCheck][i]({size:18})}</span><span><b>{x}</b><small>Manage your {x.toLowerCase()}</small></span><ChevronRight/></button>)}</div></div></>}
 
 export default App;

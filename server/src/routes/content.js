@@ -18,6 +18,7 @@ router.get("/events", async (req, res, next) => {
   try {
     const filter = { active: true };
     if (req.query.domain) filter.domain = req.query.domain;
+    if (req.query.eventType) filter.eventType = req.query.eventType;
     if (req.query.upcoming === "true") filter.startAt = { $gte: new Date() };
     res.json(await Event.find(filter).sort({ startAt: 1 }).limit(100));
   } catch (error) { next(error); }
