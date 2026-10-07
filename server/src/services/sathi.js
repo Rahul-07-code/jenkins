@@ -1,6 +1,7 @@
 import Scheme from "../models/Scheme.js";
 import Service from "../models/Service.js";
 import Event from "../models/Event.js";
+import KnowledgeDocument from "../models/KnowledgeDocument.js";
 
 function compact(items) {
   return items.map((item) => ({
@@ -18,7 +19,7 @@ async function retrieveContext(profile = {}, question = "") {
   const text = terms.join(" ");
   const textFilter = text ? { $text: { $search: text } } : {};
 
-  const [schemes, services, events] = await Promise.all([
+  const [schemes, services, events, documents] = await Promise.all([
     Scheme.find({
       active: true,
       $or: [{ domain }, { domain: "other" }],
@@ -29,10 +30,14 @@ async function retrieveContext(profile = {}, question = "") {
       $or: [{ domain }, { domain: "other" }],
       ...(text ? textFilter : {})
     }).limit(5).lean(),
-    Event.find({ active: true, ...(text ? textFilter : {}) }).sort({ startAt: 1 }).limit(5).lean()
+    Event.find({ active: true, ...(text ? textFilter : {}) }).sort({ startAt: 1 }).limit(5).lean(),
+    KnowledgeDocument.find({ status: "ready", ...(text ? textFilter : {}) })
+      .select("title sourceName sourceUrl content")
+      .limit(5)
+      .lean()
   ]);
 
-  return { schemes: compact(schemes), services: compact(services), events: compact(events) };
+  return { schemes: compact(schemes), services: compact(services), events: compact(events), documents };
 }
 
 async function askGroq(question, profile, context, history = []) {
@@ -94,8 +99,12 @@ export async function answerQuestion({ question, profile, history }) {
       : "I could not find a matching item in the current verified knowledge base. Please try a more specific question.";
   }
 
-  const sources = [...context.schemes, ...context.services, ...context.events]
-    .filter((item) => item.officialUrl);
+  const sources = [
+    ...context.schemes.map((item) => ({ title: item.title, officialUrl: item.officialUrl })),
+    ...context.services.map((item) => ({ title: item.title, officialUrl: item.officialUrl })),
+    ...context.events.map((item) => ({ title: item.title, officialUrl: item.officialUrl })),
+    ...context.documents.map((item) => ({ title: item.title, officialUrl: item.sourceUrl }))
+  ].filter((item) => item.officialUrl);
 
   return { answer, sources, context };
 }
