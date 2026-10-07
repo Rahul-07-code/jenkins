@@ -12,6 +12,7 @@ import SavedPage from "./components/SavedPage";
 import { useLanguage } from "./lib/i18n";
 import ServicesPage from "./components/ServicesPage";
 import EventsPage from "./components/EventsPage";
+import DomainDashboard from "./components/DomainDashboard";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -106,7 +107,7 @@ function App(){
         {page==="msp"&&<MSP/>}
         {page==="shops"&&<Shops/>}
         {page==="ai"&&<AI chat={chat} setChat={setChat} message={message} setMessage={setMessage}/>}
-        {isOther&&<OtherDashboard kind={page} go={go}/>}
+        {isOther&&<DomainDashboard kind={page} go={go}/>}
         {page==="settings"&&<SettingsPage/>}
         {page==="saved"&&<SavedPage/>}
         {page==="services"&&<ServicesPage/>}
