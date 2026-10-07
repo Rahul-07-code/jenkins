@@ -94,7 +94,7 @@ function App(){
         {page==="farmer"&&<FarmerDashboard go={go}/>}
         {page==="msp"&&<MSP/>}
         {page==="shops"&&<Shops/>}
-        {page==="ai"&&<AI chat={chat} message={message} setMessage={setMessage} send={()=>{if(!message.trim())return;setChat([...chat,{role:"user",text:message},{role:"assistant",text:"I can help you discover relevant Telangana schemes and opportunities. This demo response can later be connected to your backend."}]);setMessage("")}}/>}
+        {page==="ai"&&<AI chat={chat} setChat={setChat} message={message} setMessage={setMessage}/>}
         {isOther&&<OtherDashboard kind={page} go={go}/>}
         {page==="settings"&&<SettingsPage/>}
       </main>
@@ -219,7 +219,28 @@ function MSP(){return <><PageHeader title="MSP & Procurement" subtitle="Track mi
 
 function Shops(){const shops=[["Sri Venkateshwara Agro Shop","Seeds, Fertilizers, Pesticides","2.4 km"],["Rythu Mitra Agri Centre","All types of seeds and fertilizers","3.1 km"],["Agri Trends Seeds and Agri Mart","Seeds, Organic Fertilizers","4.6 km"],["Raju Fertilizers & Seeds","Fertilizers, Pesticides","5.2 km"]];return <><PageHeader title="Nearby Agri Shops" subtitle="Find trusted agricultural inputs and compare prices nearby."/><div className="small-search wide"><Search/><input placeholder="Search seeds, fertilizers, pesticides..."/></div><div className="shop-grid">{shops.map(([n,d,dist])=><article className="shop-card" key={n}><div className="shop-thumb"><Leaf/></div><div><div className="shop-top"><h3>{n}</h3><span className="status green">Open</span></div><p>{d}</p><small>{dist} · Karimnagar</small><button className="outline-btn small">View Prices</button></div></article>)}</div></>}
 
-function AI({chat,message,setMessage,send}:{chat:any[];message:string;setMessage:(s:string)=>void;send:()=>void}){return <div className="ai-page"><div className="ai-intro"><span className="ai-orb"><Bot/></span><div><span className="eyebrow">YOUR PERSONAL ASSISTANT</span><h1>Sathi AI</h1><p>Government schemes, services & opportunities — explained simply.</p></div><select><option>English</option><option>తెలుగు</option><option>हिन्दी</option></select></div><div className="chat-card"><div className="chat-head"><div><b>Sathi AI</b><span><i/> Online</span></div><button><Settings size={17}/></button></div><div className="chat-body">{chat.map((m,i)=><div key={i} className={m.role==="user"?"bubble user":"bubble"}>{m.text}</div>)}<div className="suggestions">{["What scholarships am I eligible for?","Upcoming engineering exams?","Farmer schemes in Telangana?"].map(x=><button key={x} onClick={()=>setMessage(x)}>{x}</button>)}</div></div><div className="chat-input"><input value={message} onChange={e=>setMessage(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Type your question here..."/><button onClick={send}><ArrowRight/></button></div></div></div>}
+function AI({chat,setChat,message,setMessage}:{chat:any[];setChat:(value:any[])=>void;message:string;setMessage:(s:string)=>void}){
+  const [loading,setLoading]=useState(false);
+  async function send(){
+    const question=message.trim();
+    if(!question||loading)return;
+    const nextChat=[...chat,{role:"user",text:question}];
+    setChat(nextChat);
+    setMessage("");
+    setLoading(true);
+    try{
+      const result=await apiFetch("/ai/chat",{method:"POST",body:JSON.stringify({
+        question,
+        history:chat.filter((item)=>item.role==="user"||item.role==="assistant").map((item)=>({role:item.role,content:item.text}))
+      })});
+      const sourceText=result.sources?.slice(0,3).map((item:any)=>item.title).join(", ");
+      setChat([...nextChat,{role:"assistant",text:result.answer+(sourceText?"\n\nSources: "+sourceText:"")}]);
+    }catch(err:any){
+      setChat([...nextChat,{role:"assistant",text:err.message||"Sathi AI is unavailable. Check the backend and try again."}]);
+    }finally{setLoading(false);}
+  }
+  return <div className="ai-page"><div className="ai-intro"><span className="ai-orb"><Bot/></span><div><span className="eyebrow">YOUR PERSONAL ASSISTANT</span><h1>Sathi AI</h1><p>Government schemes, services & opportunities — grounded in the current official knowledge base.</p></div><select><option>English</option><option>తెలుగు</option><option>हिन्दी</option></select></div><div className="chat-card"><div className="chat-head"><div><b>Sathi AI</b><span><i/> {loading?"Thinking":"Online"}</span></div><button><Settings size={17}/></button></div><div className="chat-body">{chat.map((m,i)=><div key={i} className={m.role==="user"?"bubble user":"bubble"}>{m.text}</div>)}<div className="suggestions">{["What scholarships am I eligible for?","Farmer schemes in Telangana?","What government services can I access?"].map(x=><button key={x} onClick={()=>setMessage(x)}>{x}</button>)}</div></div><div className="chat-input"><input value={message} onChange={e=>setMessage(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Type your question here..."/><button onClick={send}><ArrowRight/></button></div></div></div>
+}
 
 function OtherDashboard({kind,go}:{kind:string;go:(p:Page)=>void}){const data:any={government:["Government Employee","Employee Services","Government Circulars","Pension Information","Important Notifications",Landmark],private:["Private Employee / IT Professional","Relevant Scheme","Skill Development Programs","Hackathons & Opportunities","Government Services",BriefcaseBusiness],business:["Business Owner","Business Schemes","MSME Support","Registrations & Licenses","Government Tenders",Building2],senior:["Senior Citizen","Pension Schemes","Healthcare Services","Important Contacts","Document Services",Users],other:["Other Citizen","Government Schemes","Citizen Services","Important Notices","Help & Guidance",UserRound]}[kind] || ["Other Citizen","Government Schemes","Citizen Services","Important Notices","Help & Guidance",UserRound];const Icon=data[5];return <><div className="page-header"><div><span className="eyebrow">CITIZEN SERVICES</span><h1>{data[0]}</h1><p>Personalized services and important information in one place.</p></div><button className="primary-btn" onClick={()=>go("ai")}>Ask Sathi AI</button></div><div className="other-grid">{data.slice(1,5).map((x:string)=><article key={x} className="other-card"><span className="icon-tile"><Icon size={22}/></span><h3>{x}</h3><p>Explore personalized information, applications and updates.</p><button className="link">Explore <ArrowRight size={15}/></button></article>)}</div><div className="notice"><Bell/><div><b>Important notifications</b><p>Check deadlines and service updates regularly to avoid missing important opportunities.</p></div></div></>}
 
