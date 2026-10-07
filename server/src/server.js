@@ -9,24 +9,36 @@ import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.js";
 import schemeRoutes from "./routes/schemes.js";
+import contentRoutes from "./routes/content.js";
+import userRoutes from "./routes/user.js";
+import adminRoutes from "./routes/admin.js";
 
 const app = express();
 const port = Number(process.env.PORT || 5000);
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN ? process.env.CLIENT_ORIGIN.split(",").map((item) => item.trim()) : true,
+  origin: process.env.CLIENT_ORIGIN
+    ? process.env.CLIENT_ORIGIN.split(",").map((item) => item.trim())
+    : true,
   credentials: true
 }));
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "praja-sathi-api", timestamp: new Date().toISOString() });
+  res.json({
+    ok: true,
+    service: "praja-sathi-api",
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/schemes", schemeRoutes);
+app.use("/api/content", contentRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
