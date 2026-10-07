@@ -23,5 +23,5 @@ export async function remember(userId, entries) {
 }
 
 export function providerName() {
-  return process.env.HINDSIGHT_API_URL ? "hindsight-adapter" : "mongo-memory";
+  return process.env.HINDSIGHT_API_URL ? "mongo-memory (Hindsight integration pending)" : "mongo-memory";
 }
