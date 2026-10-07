@@ -5,21 +5,21 @@ export type Language = "en" | "te" | "hi";
 const dictionaries: Record<Language, Record<string, string>> = {
   en: {
     home: "Home", schemes: "Schemes", exams: "Exams & Opportunities", ai: "Sathi AI",
-    profile: "Profile", saved: "Saved & Activity", admin: "Admin Console",
+    profile: "Profile", saved: "Saved & Activity", services: "Government Services", admin: "Admin Console",
     login: "Login", register: "Register", getStarted: "Get Started",
     search: "Search schemes, exams, services...", dashboard: "Dashboard",
     officialPortal: "Official Portal", askSathi: "Ask Sathi AI", refresh: "Refresh"
   },
   te: {
     home: "హోమ్", schemes: "పథకాలు", exams: "పరీక్షలు & అవకాశాలు", ai: "సాథి AI",
-    profile: "ప్రొఫైల్", saved: "సేవ్ చేసినవి & రిమైండర్లు", admin: "అడ్మిన్",
+    profile: "ప్రొఫైల్", saved: "సేవ్ చేసినవి & రిమైండర్లు", services: "ప్రభుత్వ సేవలు", admin: "అడ్మిన్",
     login: "లాగిన్", register: "నమోదు", getStarted: "ప్రారంభించండి",
     search: "పథకాలు, పరీక్షలు, సేవలను శోధించండి...", dashboard: "డ్యాష్‌బోర్డ్",
     officialPortal: "అధికారిక పోర్టల్", askSathi: "సాథి AIని అడగండి", refresh: "రిఫ్రెష్"
   },
   hi: {
     home: "होम", schemes: "योजनाएँ", exams: "परीक्षाएँ और अवसर", ai: "साथी AI",
-    profile: "प्रोफ़ाइल", saved: "सेव और रिमाइंडर", admin: "एडमिन",
+    profile: "प्रोफ़ाइल", saved: "सेव और रिमाइंडर", services: "सरकारी सेवाएँ", admin: "एडमिन",
     login: "लॉगिन", register: "रजिस्टर", getStarted: "शुरू करें",
     search: "योजनाएँ, परीक्षाएँ, सेवाएँ खोजें...", dashboard: "डैशबोर्ड",
     officialPortal: "आधिकारिक पोर्टल", askSathi: "साथी AI से पूछें", refresh: "रिफ्रेश"
