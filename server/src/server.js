@@ -12,6 +12,7 @@ import schemeRoutes from "./routes/schemes.js";
 import contentRoutes from "./routes/content.js";
 import userRoutes from "./routes/user.js";
 import adminRoutes from "./routes/admin.js";
+import aiRoutes from "./routes/ai.js";
 
 const app = express();
 const port = Number(process.env.PORT || 5000);
@@ -39,6 +40,7 @@ app.use("/api/schemes", schemeRoutes);
 app.use("/api/content", contentRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);
