@@ -8,6 +8,7 @@ import {
 import { apiFetch, getStoredUser, saveSession } from "./lib/api";
 import SchemesData from "./components/Schemes";
 import AdminDashboard from "./components/AdminDashboard";
+import SavedPage from "./components/SavedPage";
 
 const charminar = "https://www.indiatravelforum.in/media/charminar-image-credit-wikimedia-commons.571/full";
 const farmerImage = "https://media.assettype.com/tnm/import/sites/default/files/Women_Labourers_Main.JPG?ar=40%3A21&auto=format%2Ccompress&enlarge=true&mode=crop&ogImage=true&overlay=false&overlay_position=bottom&overlay_width=100&w=1200";
@@ -16,7 +17,7 @@ type Page =
   | "home" | "login" | "register" | "occupation" | "student-details"
   | "student" | "schemes" | "exams" | "competitions" | "digilocker"
   | "farmer" | "msp" | "shops" | "ai" | "government" | "private"
-  | "business" | "senior" | "other" | "settings" | "admin";
+  | "business" | "senior" | "other" | "settings" | "admin" | "saved";
 
 const navItems = [
   ["student","Dashboard",Home],["schemes","Schemes",GraduationCap],
@@ -64,7 +65,7 @@ function App(){
   if(["home","login","register","occupation","student-details"].includes(page))
     return <PublicLayout page={page} go={go}/>;
 
-  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings",admin:"Admin Console"};
+  const titleMap:Record<string,string>={student:"Student Dashboard",schemes:"Schemes",exams:"Exams & Opportunities",competitions:"Competitions & Events",digilocker:"DigiLocker",farmer:"Farmer Dashboard",msp:"MSP & Procurement",shops:"Nearby Agri Shops",ai:"Sathi AI",government:"Government Employee",private:"Private Employee / IT",business:"Business Owner",senior:"Senior Citizen",other:"Other Citizen",settings:"Profile & Settings",admin:"Admin Console",saved:"Saved & Activity"};
   const isFarmer=["farmer","msp","shops"].includes(page);
   const isOther=["government","private","business","senior","other"].includes(page);
 
@@ -72,14 +73,14 @@ function App(){
     <header className="topbar">
       <button className="brand" onClick={()=>go("student")}><span className="brand-mark">PS</span><span><b>Praja Sathi</b><small>Telangana Citizen Companion</small></span></button>
       <div className="top-search"><Search size={17}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search schemes, exams, services..."/></div>
-      <div className="top-actions"><button aria-label="help"><CircleHelp size={19}/></button><button aria-label="notifications"><Bell size={19}/></button><button className="avatar">RK</button></div>
+      <div className="top-actions"><button aria-label="help"><CircleHelp size={19}/></button><button aria-label="notifications" onClick={()=>go("saved")}><Bell size={19}/></button><button className="avatar">RK</button></div>
       <button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X/>:<Menu/>}</button>
     </header>
     <div className="workspace">
       <aside className={mobileOpen?"sidebar open":"sidebar"}>
         <div className="profile-mini"><div className="avatar large">{initials(currentUser?.name)}</div><div><strong>{currentUser?.name || "Citizen"}</strong><span>{currentUser?.profile?.occupation ? currentUser.profile.occupation.replace("_"," ") : "Citizen"} · {currentUser?.profile?.district || "Telangana"}</span></div></div>
         <div className="side-label">PERSONALIZED</div>
-        {navItems.map(([id,label,Icon])=><button key={id} className={page===id?"side-link active":"side-link"} onClick={()=>go(id as Page)}><Icon size={18}/><span>{label}</span>{id==="schemes"&&<em>8</em>}</button>)}
+        {navItems.map(([id,label,Icon])=><button key={id} className={page===id?"side-link active":"side-link"} onClick={()=>go(id as Page)}><Icon size={18}/><span>{label}</span>{id==="schemes"&&<em>8</em>}</button>)}<button className={page==="saved"?"side-link active":"side-link"} onClick={()=>go("saved")}><CalendarClock size={18}/><span>Saved & Activity</span></button>
         <div className="side-divider"/>
         <div className="side-label">OTHER DASHBOARDS</div>
         <button className="side-link" onClick={()=>go("farmer")}><Leaf size={18}/><span>Farmer</span></button>
@@ -102,6 +103,7 @@ function App(){
         {page==="ai"&&<AI chat={chat} setChat={setChat} message={message} setMessage={setMessage}/>}
         {isOther&&<OtherDashboard kind={page} go={go}/>}
         {page==="settings"&&<SettingsPage/>}
+        {page==="saved"&&<SavedPage/>}
         {page==="admin"&&currentUser?.role==="admin"&&<AdminDashboard/>}
       </main>
     </div>
@@ -110,7 +112,7 @@ function App(){
 }
 
 function MobileBottomNav({page,go}:{page:Page;go:(p:Page)=>void}){
-  const items=[["student","Home",Home],["schemes","Schemes",Landmark],["ai","Sathi AI",Bot],["settings","Profile",Settings]] as const;
+  const items=[["student","Home",Home],["schemes","Schemes",Landmark],["saved","Saved",CalendarDays],["ai","Sathi AI",Bot]] as const;
   return <nav className="mobile-bottom-nav" aria-label="Mobile navigation">{items.map(([id,label,Icon])=><button key={id} className={page===id?"active":""} onClick={()=>go(id)}><Icon size={19}/><span>{label}</span></button>)}</nav>;
 }
 
