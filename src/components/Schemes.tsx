@@ -1,6 +1,6 @@
 import { type ComponentType, useEffect, useState } from "react";
 import { ArrowRight, CalendarDays, CircleHelp, GraduationCap, Landmark, Leaf, BriefcaseBusiness, Users, Search } from "lucide-react";
-import { apiFetch } from "../lib/api";
+import { apiFetch, getStoredUser } from "../lib/api";
 
 function SchemeIcon({ category }: { category: string }) {
   const value = category.toLowerCase();
@@ -12,6 +12,10 @@ function SchemeIcon({ category }: { category: string }) {
 }
 
 export default function Schemes({ PageHeader }: { PageHeader: ComponentType<{title:string;subtitle:string}> }) {
+  const user=getStoredUser<any>() || {};
+  const domainMap:any={student:"student",farmer:"farmer",employee:"employee",business:"business",senior_citizen:"senior_citizen",other:"other"};
+  const domain=domainMap[user.profile?.occupation] || "student";
+  const domainTitle:any={student:"Student Schemes",farmer:"Farmer Schemes",employee:"Employee Schemes",business:"Business Schemes",senior_citizen:"Senior Citizen Schemes",other:"Citizen Schemes"};
   const [items, setItems] = useState<any[]>([]);
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
@@ -23,7 +27,7 @@ export default function Schemes({ PageHeader }: { PageHeader: ComponentType<{tit
     setError("");
     try {
       const params = new URLSearchParams();
-      params.set("domain", "student");
+      params.set("domain", domain);
       if (query.trim()) params.set("q", query.trim());
       setItems(await apiFetch("/schemes?" + params.toString()));
     } catch (err: any) {
@@ -39,7 +43,7 @@ export default function Schemes({ PageHeader }: { PageHeader: ComponentType<{tit
 
   return (
     <>
-      <PageHeader title="Student Schemes" subtitle="Discover benefits and financial support from the verified Praja Sathi knowledge base." />
+      <PageHeader title={domainTitle[domain]} subtitle="Discover benefits, schemes and support matched to your citizen profile." />
       <div className="filterbar">
         {[
           ["all", "All"],
