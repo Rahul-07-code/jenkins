@@ -84,6 +84,8 @@ function App(){
         <button className="side-link" onClick={()=>go("farmer")}><Leaf size={18}/><span>Farmer</span></button>
         <button className="side-link" onClick={()=>go("government")}><Landmark size={18}/><span>Government Employee</span></button>
         <button className="side-link" onClick={()=>go("business")}><BriefcaseBusiness size={18}/><span>Business Owner</span></button>
+        <button className="side-link" onClick={()=>go("senior")}><Users size={18}/><span>Senior Citizen</span></button>
+        <button className="side-link" onClick={()=>go("other")}><UserRound size={18}/><span>Other Citizen</span></button>
       </aside>
       <main className="main">
         <div className="breadcrumb"><span>Praja Sathi</span><ChevronRight size={14}/><b>{titleMap[page]}</b></div>
@@ -100,7 +102,13 @@ function App(){
         {page==="settings"&&<SettingsPage/>}
       </main>
     </div>
+    <MobileBottomNav page={page} go={go}/>
   </div>
+}
+
+function MobileBottomNav({page,go}:{page:Page;go:(p:Page)=>void}){
+  const items=[["student","Home",Home],["schemes","Schemes",Landmark],["ai","Sathi AI",Bot],["settings","Profile",Settings]] as const;
+  return <nav className="mobile-bottom-nav" aria-label="Mobile navigation">{items.map(([id,label,Icon])=><button key={id} className={page===id?"active":""} onClick={()=>go(id)}><Icon size={19}/><span>{label}</span></button>)}</nav>;
 }
 
 function PublicLayout({page,go}:{page:Page;go:(p:Page)=>void}){
