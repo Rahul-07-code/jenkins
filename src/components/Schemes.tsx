@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 import { ArrowRight, CalendarDays, CircleHelp, GraduationCap, Landmark, Leaf, BriefcaseBusiness, Users, Search } from "lucide-react";
 import { apiFetch } from "../lib/api";
 
@@ -11,7 +11,7 @@ function SchemeIcon({ category }: { category: string }) {
   return <Landmark size={21} />;
 }
 
-export default function Schemes({ PageHeader }: { PageHeader: React.ComponentType<{title:string;subtitle:string}> }) {
+export default function Schemes({ PageHeader }: { PageHeader: ComponentType<{title:string;subtitle:string}> }) {
   const [items, setItems] = useState<any[]>([]);
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
